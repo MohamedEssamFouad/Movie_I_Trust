@@ -5,7 +5,9 @@ import 'package:note_movie_app/model/db.dart';
 import 'dart:typed_data';
 import 'dart:io';
 import 'package:share_plus/share_plus.dart';
+import 'package:shared_preferences/shared_preferences.dart';
 
+import '../views/HomeScreen.dart';
 class Controller extends GetxController {
   RxInt currentIndex = 0.obs;
   Rx<XFile?> pickedImage = Rx<XFile?>(null);
@@ -70,5 +72,10 @@ class Controller extends GetxController {
   void SharePresed(){
     String m='Check out my movie i have added to Movie I Trust App';
     Share.share(m);
+  }
+  Future<void>completeIntro () async {
+    SharedPreferences prefs=await SharedPreferences.getInstance();
+    await prefs.setBool('hasSeenIntro', true);
+    Get.off(()=>HomeScreen());
   }
 }

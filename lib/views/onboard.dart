@@ -1,25 +1,17 @@
 import 'package:flutter/material.dart';
 import 'package:get/get.dart';
 import 'package:flutter_screenutil/flutter_screenutil.dart';
-import 'package:get/get_state_manager/get_state_manager.dart';
+import 'package:note_movie_app/views/widget/OnboardButtom.dart';
+import 'package:note_movie_app/views/widget/buildDot.dart';
 import '../controller/controller.dart';
 import '../model/contentONboard.dart';
 import 'HomeScreen.dart';
 import '../model/consts.dart';
 import '../model/OnboardAssets.dart';
-import 'package:shared_preferences/shared_preferences.dart';
-
-
 class OnBoardSc extends StatelessWidget {
   final Controller controller = Get.put(Controller());
 
   late PageController _controller;
-
-  List<ContentOnboard> contents = [
-    ContentOnboard("Now you can more quickly and easily note your movie into your watchlist!"),
-    ContentOnboard("Easy to add and maintain."),
-    ContentOnboard("Imagine your life without the app."),
-  ];
 
   @override
   Widget build(BuildContext context) {
@@ -36,18 +28,18 @@ class OnBoardSc extends StatelessWidget {
                 child: Text(
                   'Movie I Trust',
                   style: TextStyle(
-                    fontSize: 30.sp, // Responsive font size
+                    fontSize: 30.sp,
                     fontWeight: FontWeight.bold,
                     color: consts.white,
                   ),
                 ),
               ),
               SizedBox(
-                height: 0.5.sh, // Use half of screen height for the PageView
+                height: 0.5.sh,
                 child: PageView.builder(
                   physics: BouncingScrollPhysics(),
                   controller: _controller,
-                  itemCount: contents.length,
+                  itemCount: ContentOnboard.contents.length,
                   onPageChanged: controller.onPageChanged,
                   itemBuilder: (context, index) {
                     return Padding(
@@ -56,13 +48,13 @@ class OnBoardSc extends StatelessWidget {
                         children: [
                           Image.asset(
                             OnboardAssets.images[index],
-                            width: 1.sw - 40.sp, // Take full screen width minus padding
-                            height: 200.h, // Fixed height for images
+                            width: 1.sw - 40.sp,
+                            height: 200.h,
                             fit: BoxFit.contain,
                           ),
                           SizedBox(height: 20.h),
                           Text(
-                            contents[index].title,
+                            ContentOnboard.contents[index].title,
                             textAlign: TextAlign.center,
                             style: TextStyle(
                               fontStyle: FontStyle.italic,
@@ -78,67 +70,20 @@ class OnBoardSc extends StatelessWidget {
                 ),
               ),
               Obx(
-                ()=> Row(
+                    () => Row(
                   mainAxisAlignment: MainAxisAlignment.center,
                   children: List.generate(
-                    contents.length,
+                    ContentOnboard.contents.length,
                         (index) => buildDot(index, context),
                   ),
                 ),
               ),
               SizedBox(height: 20.h),
-              Container(
-                height: 60.h,
-                margin: EdgeInsets.symmetric(horizontal: 40.sp, vertical: 20.sp),
-                width: double.infinity,
-                child: ElevatedButton(
-                  onPressed: () {
-                    if (controller.currentIndex.value == contents.length - 1) {
-                      Get.offAll(() => HomeScreen());
-                      completeIntro();// Ensure no back navigation to OnBoarding
-                    } else {
-                      _controller.nextPage(
-                        duration: Duration(milliseconds: 200),
-                        curve: Curves.easeIn,
-                      );
-                    }
-                  },
-                  style: ElevatedButton.styleFrom(
-                    backgroundColor: consts.white, // Button color
-                    shape: RoundedRectangleBorder(
-                      borderRadius: BorderRadius.circular(30.sp),
-                    ),
-                  ),
-                  child: Obx(() => Text(
-                    controller.currentIndex.value == contents.length - 1 ? "Get Started" : "Next",
-                    style: TextStyle(
-                      color: consts.myColor,
-                      fontSize: 18.sp, // Responsive font size
-                    ),
-                  )),
-                ),
-              ),
+              OnboardButtom(controller: controller, pageController: _controller), // Updated this line
             ],
           ),
         ),
       ),
     );
-  }
-
-  Container buildDot(int index, BuildContext context) {
-    return Container(
-      height: 10.h,
-      width: controller.currentIndex.value == index ? 25.w : 10.w,
-      margin: EdgeInsets.symmetric(horizontal: 5.w),
-      decoration: BoxDecoration(
-        borderRadius: BorderRadius.circular(100.sp),
-        color: controller.currentIndex.value == index ? consts.white : Colors.grey.shade600,
-      ),
-    );
-  }
-  Future<void>completeIntro () async {
-    SharedPreferences prefs=await SharedPreferences.getInstance();
-    await prefs.setBool('hasSeenIntro', true);
-    Get.off(()=>HomeScreen());
   }
 }
